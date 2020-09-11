@@ -1,0 +1,8 @@
+env/
+*.pyc
+lib/
+.DS_Store
+.env
+database.db
+migrations
+dump.rdb
