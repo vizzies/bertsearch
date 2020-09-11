@@ -1,0 +1,7 @@
+FLASK_ENV=development
+FLASK_RUN_PORT=8080
+FLASK_APP=bertsearch
+DEV_DATABASE_URI=sqlite:///database.db
+PROD_DATABASE_URI=sqlite:///database.db
+CELERY_BROKER_URL=redis://127.0.0.1:6379/0
+CELERY_RESULT_BACKEND_URL=redis://127.0.0.1:6379/0
