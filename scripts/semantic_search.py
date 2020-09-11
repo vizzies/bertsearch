@@ -37,34 +37,37 @@ def preprocess_text(sen):
 
     return sentence
 
+def get_search_result(embedder, text_embeddings, query, closets_n=5):
+    query_embedding = embedder.encode([query])
+    distances = scipy.spatial.distance.cdist([query_embedding], text_embeddings, "cosine")[0]
+    results = []
+
+    for idx, distance in enumerate(sorted(distances)[:closest_n]):
+        results.append(
+            {
+                "score": 1 - distance,
+                "document_id": idx,
+                "title": pubs.iloc[idx]["Title"]
+                "abstract": pubs.iloc[idx]["Abstract"],
+                "abstract_length": pubs.iloc[idx]["Abstract Length"],
+                "word_count": pubs.iloc[idx]["Word Count"]
+            }
+        )
+
+
 #process text, create model, and sentences
 pubs['Text Processed'] = pubs.apply(lambda row: preprocess_text(row['Text']), axis=1)
+pubs['Word Count'] = pubs.apply(lambda row: len(row['Text Processed'].split()), axis=1)
 text_df = pubs[['Text Processed',]].copy()
 embedder = SentenceTransformer('bert-base-nli-mean-tokens')
 sentences = list(text_df['Text Processed'])
 
 # Eaxmple query sentences
 queries = ['How to evolve architecture for constellations and simulation', 'Build behavior of complex aerospace and modeling of safety']
-query_embeddings = embedder.encode(queries,show_progress_bar=True)
 text_embeddings = embedder.encode(sentences, show_progress_bar=True)
 
 # Find the closest 5 sentences of the corpus for each query sentence based on cosine similarity
-closest_n = 5
+
 print("\nTop 5 most similar sentences in corpus:")
-for query, query_embedding in zip(queries, query_embeddings):
-    distances = scipy.spatial.distance.cdist([query_embedding], text_embeddings, "cosine")[0]
-
-    results = zip(range(len(distances)), distances)
-    results = sorted(results, key=lambda x: x[1])
-
-    print("\n\n=========================================================")
-    print("==========================Query==============================")
-    print("===",query,"=====")
-    print("=========================================================")
-
-    for idx, distance in results[0:closest_n]:
-        print("Score:   ", "(Score: %.4f)" % (1-distance) , "\n" )
-        row_dict = pubs.iloc[idx].to_dict()
-        print("Title:  " , row_dict["Title"]  , "\n")
-        print("Abstract:  " , row_dict["Abstract"] , "\n")
-        print("-------------------------------------------")
+for query in queries:
+    print(get_search_result(embedder, text_embeddings, query, closest_n=5))
