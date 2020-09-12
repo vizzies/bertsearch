@@ -9,7 +9,7 @@ def create_app(config="DevConfig"):
 
     app = Flask(__name__)
 
-    app.config.from_object(f"search-api.config.{config}")
+    app.config.from_object(f"bertsearch.config.{config}")
     
     with app.app_context():
         
@@ -44,13 +44,7 @@ def init_celery(app: Flask = None) -> Celery:
     # Configuration of placeholder happens here
     celery.conf.update(
         broker_url="redis://127.0.0.1:6379",
-        result_backend="redis://127.0.0.1:6379",
-        beat_schedule={
-            "periodic_task-every-minute": {
-                "task": "reusetracker.tasks.example.dummy_task",
-                "schedule": crontab(minute="*"),
-            }
-        },
+        result_backend="redis://127.0.0.1:6379"
     )
 
     celery.Task = ContextTask

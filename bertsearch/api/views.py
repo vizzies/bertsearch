@@ -8,12 +8,16 @@ from bertsearch.api.schemas import *
 
 parser = reqparse.RequestParser()
 
-parser.add_argument("date",
-                    type=lambda x: x if dt.date.fromisoformat(x) else False,
-                    help="date param must be in ISO date format (YYYY-MM-DD)")
-parser.add_argument("author",
+parser.add_argument("q",
                     type=str,
-                    help="author param must be a string")
+                    help="query term must be a string")
+
+# parser.add_argument("date",
+#                     type=lambda x: x if dt.date.fromisoformat(x) else False,
+#                     help="date param must be in ISO date format (YYYY-MM-DD)")
+# parser.add_argument("author",
+#                     type=str,
+#                     help="author param must be a string")
 
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")

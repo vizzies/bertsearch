@@ -4,6 +4,7 @@ from bertsearch.api.schemas import ResultSchema
 from bertsearch.models import Result
 from bertsearch.extensions import db
 from bertsearch.commons.pagination import paginate
+from .semantic_search import *
 
 
 class ResultResource(Resource):
@@ -41,6 +42,11 @@ class ResultList(Resource):
         self.args = self.parser.parse_args()
     
     def get(self):
+        query = self.args.get("q")
+        if query:
+            
+            results = semantic_search.get_search_result(embedder, text_embeddings, query, closest_n=50)
+
         schema = ResultSchema(many=True)
         query = Result.query
         return paginate(query, schema)
