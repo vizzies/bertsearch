@@ -4,8 +4,9 @@ from sentence_transformers import SentenceTransformer
 import scipy.spatial
 import pickle as pkl
 import re
+from pprint import pprint
 
-with open('/content/arc-code-ti-publications.pkl', 'rb') as f:
+with open('../arc-code-ti-publications.pkl', 'rb') as f:
     pubs = pandas.read_pickle(f)
 
 TAG_RE = re.compile(r'<[^>]+>')
@@ -37,9 +38,9 @@ def preprocess_text(sen):
 
     return sentence
 
-def get_search_result(embedder, text_embeddings, query, closets_n=5):
+def get_search_result(embedder, text_embeddings, query, closest_n=5):
     query_embedding = embedder.encode([query])
-    distances = scipy.spatial.distance.cdist([query_embedding], text_embeddings, "cosine")[0]
+    distances = scipy.spatial.distance.cdist(query_embedding, text_embeddings, "cosine")[0]
     results = []
 
     for idx, distance in enumerate(sorted(distances)[:closest_n]):
@@ -47,13 +48,14 @@ def get_search_result(embedder, text_embeddings, query, closets_n=5):
             {
                 "score": 1 - distance,
                 "document_id": idx,
-                "title": pubs.iloc[idx]["Title"]
+                "title": pubs.iloc[idx]["Title"],
                 "abstract": pubs.iloc[idx]["Abstract"],
                 "abstract_length": pubs.iloc[idx]["Abstract Length"],
                 "word_count": pubs.iloc[idx]["Word Count"]
             }
         )
-
+        
+    return results
 
 #process text, create model, and sentences
 pubs['Text Processed'] = pubs.apply(lambda row: preprocess_text(row['Text']), axis=1)
@@ -70,4 +72,4 @@ text_embeddings = embedder.encode(sentences, show_progress_bar=True)
 
 print("\nTop 5 most similar sentences in corpus:")
 for query in queries:
-    print(get_search_result(embedder, text_embeddings, query, closest_n=5))
+    pprint(get_search_result(embedder, text_embeddings, query, closest_n=5))
